@@ -17,13 +17,6 @@
   <div class="container">
     <h1 class="mb-4">PG Psychology Colleges in India</h1>
 
-    <label for="cuetFilter" class="form-label">Filter by Admission Process:</label>
-    <select id="cuetFilter" class="form-select" onchange="filterTable()">
-      <option value="All">All</option>
-      <option value="CUET-PG">CUET</option>
-      <option value="Non-CUET">Non-CUET</option>
-    </select>
-
     <select id="processFilter">
       <option value="All">All Processes</option>
       <option value="CUET-PG">CUET-PG</option>
@@ -457,6 +450,14 @@
     // Initial render
     window.onload = function() {
       renderTable(data);
+        document.getElementById("searchInput").addEventListener("input", filterTable);
+        document.getElementById("processFilter").addEventListener("change", filterTable);
+        document.getElementById("courseTypeFilter").addEventListener("change", filterTable);
+        document.getElementById("specializationFilter").addEventListener("change", filterTable);
+        document.getElementById("locationFilter").addEventListener("change", filterTable);
+        document.getElementById("collegeTypeFilter").addEventListener("change", filterTable);
+        document.getElementById("modeFilter").addEventListener("change", filterTable);
+        document.getElementById("feesFilter").addEventListener("change", filterTable);
     }
   </script>
 </body>
