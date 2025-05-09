@@ -312,13 +312,23 @@
       tableBody.innerHTML = "";
       filteredData.forEach(college => {
         const row = `<tr>
-          <td>${college.name}</td>
-          <td>${college.course}</td>
-          <td>${college.specialization}</td>
-          <td>${college.location}</td>
-          <td>${college.process}</td>
-          <td>${college.eligibility}</td>
-          <td>${college.fees}</td>
+            <td>${college.name}</td>
+            <td>${college.course}</td>
+            <td>${college.specialization}</td>
+            <td>${college.location}</td>
+            <td>${college.collegeType}</td>
+            <td>${college.process}</td>
+            <td>${college.cutoff || ""}</td>
+            <td>${college.eligibility}</td>
+            <td>${college.accreditation}</td>
+            <td>${college.fees}</td>
+            <td>${college.scholarships}</td>
+            <td>${college.placements}</td>
+            <td>${college.mode}</td>
+            <td>${college.facilities}</td>
+            <td>${college.batchSize}</td>
+            <td>${college.peerReviews}</td>
+            <td>${college.why}</td>
         </tr>`;
         tableBody.innerHTML += row;
       });
