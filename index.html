@@ -24,6 +24,60 @@
       <option value="Non-CUET">Non-CUET</option>
     </select>
 
+    <select id="processFilter">
+      <option value="All">All Processes</option>
+      <option value="CUET-PG">CUET-PG</option>
+      <option value="Non-CUET">Non-CUET</option>
+      <option value="Own Entrance">Own Entrance</option>
+      <option value="TISSNET">TISSNET</option>
+    </select>
+    
+    <select id="courseTypeFilter">
+      <option value="All">All Course Types</option>
+      <option value="MA">MA</option>
+      <option value="MSc">MSc</option>
+      <option value="MPhil">MPhil</option>
+    </select>
+    
+    <select id="specializationFilter">
+      <option value="All">All Specializations</option>
+      <option value="Clinical">Clinical</option>
+      <option value="Counselling">Counselling</option>
+      <option value="Applied">Applied</option>
+      <option value="General">General</option>
+    </select>
+    
+    <select id="locationFilter">
+      <option value="All">All Locations</option>
+      <option value="Delhi">Delhi</option>
+      <option value="Mumbai">Mumbai</option>
+      <option value="Chennai">Chennai</option>
+      <!-- Add more as needed -->
+    </select>
+    
+    <select id="collegeTypeFilter">
+      <option value="All">All College Types</option>
+      <option value="Central">Central</option>
+      <option value="State">State</option>
+      <option value="Private">Private</option>
+      <option value="Deemed">Deemed</option>
+      <option value="Autonomous">Autonomous</option>
+    </select>
+    
+    <select id="modeFilter">
+      <option value="All">All Modes</option>
+      <option value="Regular">Regular</option>
+      <option value="Distance">Distance</option>
+    </select>
+    
+    <select id="feesFilter">
+      <option value="All">All Fees</option>
+      <option value="under20k">Under ₹20,000</option>
+      <option value="20kto50k">₹20,000–₹50,000</option>
+      <option value="50kto1L">₹50,000–₹1,00,000</option>
+      <option value="above1L">Above ₹1,00,000</option>
+    </select>
+
     <input type="text" id="searchInput" class="form-control mt-3" placeholder="Search for colleges..." onkeyup="filterTable()" />
 
     <div class="table-responsive mt-3">
@@ -334,20 +388,69 @@
       });
     }
 
-    function filterTable() {
+   function filterTable() {
       const query = document.getElementById("searchInput").value.toLowerCase();
-      const process = document.getElementById("cuetFilter").value;
-
+      const process = document.getElementById("processFilter").value;
+      const courseType = document.getElementById("courseTypeFilter").value;
+      const specialization = document.getElementById("specializationFilter").value;
+      const location = document.getElementById("locationFilter").value;
+      const collegeType = document.getElementById("collegeTypeFilter").value;
+      const mode = document.getElementById("modeFilter").value;
+      const fees = document.getElementById("feesFilter").value;
+    
       const filtered = data.filter(college => {
+        // Search
         const matchesSearch = Object.values(college).some(val =>
-          val.toLowerCase().includes(query)
+          String(val).toLowerCase().includes(query)
         );
-        const matchesProcess = (process === "All") ||
-          (process === "CUET-PG" && college.process === "CUET-PG") ||
-          (process === "Non-CUET" && college.process !== "CUET-PG");
-        return matchesSearch && matchesProcess;
+    
+        // Admission Process
+        const matchesProcess = (process === "All") || (college.process === process);
+    
+        // Course Type
+        const matchesCourseType = (courseType === "All") || (college.course === courseType);
+    
+        // Specialization
+        const matchesSpecialization = (specialization === "All") ||
+          (college.specialization && college.specialization.toLowerCase().includes(specialization.toLowerCase()));
+    
+        // Location (checks if city or state matches)
+        const matchesLocation = (location === "All") ||
+          (college.location && college.location.toLowerCase().includes(location.toLowerCase()));
+    
+        // College Type
+        const matchesCollegeType = (collegeType === "All") ||
+          (college.collegeType && college.collegeType.toLowerCase().includes(collegeType.toLowerCase()));
+    
+        // Mode of Study
+        const matchesMode = (mode === "All") ||
+          (college.mode && college.mode.toLowerCase().includes(mode.toLowerCase()));
+    
+        // Fees
+        let matchesFees = true;
+        if (fees !== "All" && college.fees) {
+          // Extract the lower and upper fee values (remove commas, handle ranges)
+          let feeStr = college.fees.replace(/,/g, '').replace(/[^\d–-]/g, '');
+          let [minFee, maxFee] = feeStr.split(/–|-/).map(Number);
+          if (!maxFee) maxFee = minFee;
+          if (fees === "under20k") matchesFees = minFee <= 20000;
+          if (fees === "20kto50k") matchesFees = minFee >= 20000 && maxFee <= 50000;
+          if (fees === "50kto1L") matchesFees = minFee >= 50000 && maxFee <= 100000;
+          if (fees === "above1L") matchesFees = minFee >= 100000;
+        }
+    
+        return (
+          matchesSearch &&
+          matchesProcess &&
+          matchesCourseType &&
+          matchesSpecialization &&
+          matchesLocation &&
+          matchesCollegeType &&
+          matchesMode &&
+          matchesFees
+        );
       });
-
+    
       renderTable(filtered);
     }
 
