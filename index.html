@@ -2,463 +2,1038 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PG Colleges Directory</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>CUET College Finder</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Nunito:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/1118/1118158.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { padding: 40px; background-color: #f8f9fa; }
-    table { margin-top: 20px; }
-    th, td { white-space: nowrap; word-wrap: break-word; }
-    h1 { color: #343a40; }
-    .container { max-width: 1200px; margin: 0 auto; }
+    :root {
+      --primary: #0055d3;
+      --primary-light: #eaf1fb;
+      --accent: #b3cdfa;
+      --text-dark: #1a1a1a;
+      --text-light: #fff;
+      --card-radius: 20px;
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      margin: 0;
+      background: var(--primary-light);
+      font-family: 'Nunito', sans-serif;
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.dark {
+      background: #0a1a32;
+      color: #eaf1fb;
+    }
+    header {
+      background: var(--primary);
+      color: var(--text-light);
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: 1px;
+      padding: 1.2rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px #0055d330;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header img {
+      width: 40px;
+      height: 40px;
+      margin-right: 1rem;
+      object-fit: contain;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 2rem auto 0 auto;
+      padding: 0 1rem;
+      flex: 1 1 auto;
+    }
+    .hero {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+    .hero-text {
+      flex: 1 1 300px;
+    }
+    .hero-text h1 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 2.3rem;
+      color: var(--primary);
+      margin: 0 0 0.5rem 0;
+      font-weight: 700;
+    }
+    .hero-text p {
+      color: #23407a;
+      font-size: 1.1rem;
+      margin: 0;
+    }
+    .hero-img {
+      flex: 1 1 220px;
+      max-width: 260px;
+      background: var(--primary-light);
+      border-radius: var(--card-radius);
+      box-shadow: 0 8px 24px #0055d320;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-img img {
+      width: 100%;
+      display: block;
+    }
+    .finder, .filters-bar {
+      background: var(--primary-light);
+      padding: 1.5rem 2rem;
+      border-radius: var(--card-radius);
+      box-shadow: 0 6px 18px #0055d320;
+      margin-bottom: 1.8rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+    }
+    .finder label, .filters-bar label {
+      font-family: 'Poppins', sans-serif;
+      color: var(--primary);
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
+    }
+    .finder input[type="number"], .filters-bar select, .filters-bar input[type="number"] {
+      padding: 0.6rem 1rem;
+      font-size: 1.1rem;
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      font-family: 'Nunito', sans-serif;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .finder input[type="number"]:focus, .filters-bar select:focus, .filters-bar input[type="number"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 8px #0055d399;
+    }
+    .finder button, .filters-bar button, .compare-btn, .dark-toggle, .newsletter-btn, .back-to-top {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      padding: 0.7rem 1.5rem;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      cursor: pointer;
+      box-shadow: 0 4px 14px #0055d340;
+      transition: background 0.2s;
+      margin-left: 0.5rem;
+    }
+    .finder button:hover, .filters-bar button:hover, .compare-btn:hover, .dark-toggle:hover, .newsletter-btn:hover {
+      background: #003b8e;
+    }
+    #resultsCount {
+      margin: 1.5rem 0 1rem 0;
+      text-align: center;
+      font-family: 'Poppins', sans-serif;
+      color: var(--primary);
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(340px,1fr));
+      gap: 2rem;
+    }
+    .college-card {
+      background: #fff;
+      border-radius: var(--card-radius);
+      box-shadow: 0 6px 18px #0055d320;
+      min-width: 340px;
+      min-height: 320px;
+      padding: 1.3rem 1.3rem 1.7rem;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.18s, box-shadow 0.18s;
+      cursor: pointer;
+      border: 2px solid transparent;
+      position: relative;
+    }
+    .college-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 12px 30px #0055d330;
+      border-color: var(--primary);
+    }
+    .college-card h3 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.1rem;
+      color: var(--primary);
+      margin: 0 0 0.4rem 0;
+      font-weight: 700;
+    }
+    .college-meta {
+      font-size: 0.98rem;
+      color: #23407a;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 0.8rem;
+    }
+    .college-meta span {
+      background: var(--accent);
+      padding: 0.2rem 0.7rem;
+      border-radius: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+    .cutoff {
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      padding: 0.35rem 1rem;
+      border-radius: 14px;
+      font-size: 0.98rem;
+      align-self: flex-start;
+      box-shadow: 0 2px 8px #0055d340;
+      margin-bottom: 0.8rem;
+    }
+    .details-btn, .fav-btn, .compare-btn {
+      margin-top: 0.8rem;
+      margin-right: 0.5rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 0.5rem 1.1rem;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      box-shadow: 0 6px 18px #0055d330;
+      display: inline-block;
+    }
+    .details-btn:hover, .fav-btn:hover, .compare-btn:hover {
+      background: #003b8e;
+    }
+    .fav-btn.favorited {
+      background: #fff;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+    .compare-btn.selected {
+      background: #fff;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+    }
+    .review-section {
+      margin-top: 1.2rem;
+      background: var(--primary-light);
+      border-radius: 12px;
+      padding: 1rem;
+      font-size: 0.98rem;
+    }
+    .review-section h4 {
+      margin: 0 0 0.5rem 0;
+      color: var(--primary);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.1rem;
+    }
+    .review-list {
+      margin: 0 0 1rem 0;
+      padding: 0;
+      list-style: none;
+    }
+    .review-list li {
+      border-bottom: 1px solid var(--accent);
+      padding: 0.3rem 0;
+    }
+    .review-form input, .review-form textarea {
+      width: 100%;
+      margin-bottom: 0.5rem;
+      border: 1.5px solid var(--accent);
+      border-radius: 8px;
+      padding: 0.5rem;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+    .review-form button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 0.4rem 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    .review-form button:hover {
+      background: #003b8e;
+    }
+    /* Modal */
+    #modal, #compareModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 85, 211, 0.13);
+      backdrop-filter: blur(2px);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+    #modal.active, #compareModal.active {
+      display: flex;
+    }
+    #modal .modal-content, #compareModal .modal-content {
+      background: white;
+      border-radius: 24px;
+      max-width: 700px;
+      width: 100%;
+      padding: 2rem 2.2rem;
+      box-shadow: 0 12px 30px #0055d330;
+      position: relative;
+      font-family: 'Nunito', sans-serif;
+      color: #1a1a1a;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    #modal .close-btn, #compareModal .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1.4rem;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      cursor: pointer;
+      transition: color 0.2s;
+      user-select: none;
+      background: none;
+      border: none;
+    }
+    #modal .close-btn:hover, #compareModal .close-btn:hover {
+      color: #003b8e;
+    }
+    #modal h2, #compareModal h2 {
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.5rem;
+      margin-top: 0;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    #modal ul, #compareModal ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+    #modal ul li, #compareModal ul li {
+      padding: 0.55rem 0;
+      border-bottom: 1px solid var(--accent);
+      font-size: 1rem;
+    }
+    #modal ul li strong, #compareModal ul li strong {
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .trend-chart-container {
+      margin: 1.5rem 0 0.5rem 0;
+      background: var(--primary-light);
+      border-radius: 14px;
+      padding: 1rem;
+    }
+    .share-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 0.4rem 1rem;
+      font-size: 0.98rem;
+      margin-top: 1rem;
+      cursor: pointer;
+    }
+    .share-btn:hover {
+      background: #003b8e;
+    }
+    .dark-toggle {
+      position: fixed;
+      bottom: 110px;
+      right: 24px;
+      z-index: 100;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px #0055d340;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .dark-toggle:hover {
+      background: #003b8e;
+    }
+    .back-to-top {
+      position: fixed;
+      bottom: 50px;
+      right: 24px;
+      z-index: 100;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      font-size: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 2px 8px #0055d340;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: none;
+    }
+    .back-to-top.visible {
+      display: flex;
+    }
+    .spinner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 2rem auto;
+    }
+    .spinner div {
+      width: 18px;
+      height: 18px;
+      margin: 0 4px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: inline-block;
+      animation: bounce 1.4s infinite both;
+    }
+    .spinner div:nth-child(2) { animation-delay: 0.2s; }
+    .spinner div:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0.6); }
+      40% { transform: scale(1.2); }
+    }
+    .newsletter {
+      background: var(--primary-light);
+      border-radius: 16px;
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+      box-shadow: 0 4px 14px #0055d320;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 1rem;
+      justify-content: space-between;
+    }
+    .newsletter input[type="email"] {
+      padding: 0.6rem 1rem;
+      font-size: 1.1rem;
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      font-family: 'Nunito', sans-serif;
+      outline: none;
+      transition: border 0.2s;
+    }
+    .newsletter input[type="email"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 8px #0055d399;
+    }
+    .newsletter-btn {
+      margin-left: 0.5rem;
+    }
+    .faq-section {
+      background: var(--primary-light);
+      border-radius: 16px;
+      padding: 1.5rem 2rem;
+      margin: 2rem 0;
+      box-shadow: 0 4px 14px #0055d320;
+    }
+    .faq-section h3 {
+      color: var(--primary);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+    .faq {
+      margin-bottom: 1rem;
+    }
+    .faq-question {
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--primary);
+      margin-bottom: 0.2rem;
+    }
+    .faq-answer {
+      display: none;
+      margin-bottom: 0.7rem;
+      color: #23407a;
+    }
+    .faq.open .faq-answer {
+      display: block;
+    }
+    .footer {
+      background: var(--primary);
+      color: white;
+      padding: 2.5rem 1rem 1rem;
+      font-family: 'Nunito', sans-serif;
+      border-top-left-radius: 40px;
+      border-top-right-radius: 40px;
+      box-shadow: 0 -4px 20px #0055d340;
+      margin-top: 4rem;
+    }
+    .footer-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2.5rem;
+      justify-content: space-between;
+    }
+    .footer-section {
+      flex: 1 1 260px;
+    }
+    .footer-about h3 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 0.8rem;
+    }
+    .footer-about p {
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #b3cdfa;
+    }
+    .footer-links h4,
+    .footer-contact h4 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 0.8rem;
+      color: #b3cdfa;
+    }
+    .footer-links ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .footer-links ul li {
+      margin-bottom: 0.5rem;
+    }
+    .footer-links ul li a {
+      color: #b3cdfa;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .footer-links ul li a:hover {
+      color: #fff;
+    }
+    .footer-contact p {
+      margin: 0.3rem 0;
+      font-size: 1rem;
+      color: #b3cdfa;
+    }
+    .footer-contact a {
+      color: #b3cdfa;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .footer-contact a:hover {
+      color: #fff;
+    }
+    .social-icons a {
+      font-size: 1.6rem;
+      margin-right: 1rem;
+      color: #b3cdfa;
+      transition: color 0.3s ease;
+      text-decoration: none;
+    }
+    .social-icons a:hover {
+      color: #fff;
+    }
+    .footer-bottom {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #b3cdfa;
+      margin-top: 1.8rem;
+      font-family: 'Nunito', sans-serif;
+    }
+    @media (max-width: 700px) {
+      .container { padding: 0 0.4rem; }
+      .hero { flex-direction: column; gap: 1.2rem; }
+      .hero-img { max-width: 100%; }
+      .finder, .filters-bar, .newsletter, .faq-section { flex-direction: column; align-items: stretch; }
+      .finder input[type="number"], .filters-bar select, .filters-bar input[type="number"], .newsletter input[type="email"] { width: 100%; }
+      .finder button, .filters-bar button, .newsletter-btn { width: 100%; }
+      #modal .modal-content, #compareModal .modal-content { padding: 1.1rem 0.7rem; }
+      .footer-container { flex-direction: column; gap: 1.8rem; }
+      .footer-section { flex: 1 1 100%; }
+    }
   </style>
 </head>
 <body>
+  <header>
+    <img src="https://cdn-icons-png.flaticon.com/512/1118/1118158.png" alt="Logo" />
+    CUET College Finder
+  </header>
+  <button class="dark-toggle" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+  <button class="back-to-top" title="Back to top" aria-label="Back to top">↑</button>
   <div class="container">
-    <h1 class="mb-4">PG Psychology Colleges in India</h1>
-
-    <select id="processFilter">
-      <option value="All">All Processes</option>
-      <option value="CUET-PG">CUET-PG</option>
-      <option value="Non-CUET">Non-CUET</option>
-      <option value="Own Entrance">Own Entrance</option>
-      <option value="TISSNET">TISSNET</option>
-    </select>
-    
-    <select id="courseTypeFilter">
-      <option value="All">All Course Types</option>
-      <option value="MA">MA</option>
-      <option value="MSc">MSc</option>
-      <option value="MPhil">MPhil</option>
-    </select>
-    
-    <select id="specializationFilter">
-      <option value="All">All Specializations</option>
-      <option value="Clinical">Clinical</option>
-      <option value="Counselling">Counselling</option>
-      <option value="Applied">Applied</option>
-      <option value="General">General</option>
-    </select>
-    
-    <select id="locationFilter">
-      <option value="All">All Locations</option>
-      <option value="Delhi">Delhi</option>
-      <option value="Mumbai">Mumbai</option>
-      <option value="Chennai">Chennai</option>
-      <!-- Add more as needed -->
-    </select>
-    
-    <select id="collegeTypeFilter">
-      <option value="All">All College Types</option>
-      <option value="Central">Central</option>
-      <option value="State">State</option>
-      <option value="Private">Private</option>
-      <option value="Deemed">Deemed</option>
-      <option value="Autonomous">Autonomous</option>
-    </select>
-    
-    <select id="modeFilter">
-      <option value="All">All Modes</option>
-      <option value="Regular">Regular</option>
-      <option value="Distance">Distance</option>
-    </select>
-    
-    <select id="feesFilter">
-      <option value="All">All Fees</option>
-      <option value="under20k">Under ₹20,000</option>
-      <option value="20kto50k">₹20,000–₹50,000</option>
-      <option value="50kto1L">₹50,000–₹1,00,000</option>
-      <option value="above1L">Above ₹1,00,000</option>
-    </select>
-
-    <input type="text" id="searchInput" class="form-control mt-3" placeholder="Search for colleges..." onkeyup="filterTable()" />
-
-    <div class="table-responsive mt-3">
-      <table class="table table-striped table-hover" id="collegeTable">
-        <thead class="table-dark">
-          <tr>
-            <th>Name</th>
-            <th>Course</th>
-            <th>Specialization</th>
-            <th>Location</th>
-            <th>College Type</th>
-            <th>Process</th>
-            <th>Cutoff</th>
-            <th>Eligibility</th>
-            <th>Accreditation</th>
-            <th>Fees</th>
-            <th>Scholarships</th>
-            <th>Placements</th>
-            <th>Mode</th>
-            <th>Facilities</th>
-            <th>Batch Size</th>
-            <th>Peer Reviews</th>
-            <th>Why Choose?</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody">
-          <!-- Data will be injected by JS -->
-        </tbody>
-      </table>
+    <section class="hero" id="hero">
+      <div class="hero-text">
+        <h1>Find Your Best Fit College</h1>
+        <p>Enter your CUET-PG score to instantly discover top colleges you’re eligible for. Filter, compare, review, and share-all in one place!</p>
+      </div>
+      <div class="hero-img">
+       <img src="graduation.svg" alt="Graduation Illustration">
+      </div>
+    </section>
+    <section class="finder" aria-label="CUET Score Input">
+      <form id="finderForm" autocomplete="off" novalidate>
+        <label for="scoreInput">Your CUET-PG Score:</label>
+        <input type="number" id="scoreInput" min="0" max="1000" placeholder="e.g. 210" required />
+        <button type="submit" aria-label="Find Colleges">Find Colleges</button>
+      </form>
+    </section>
+    <section class="filters-bar" id="filtersBar">
+      <label for="stateFilter">State:</label>
+      <select id="stateFilter"><option value="">All</option></select>
+      <label for="specFilter">Specialization:</label>
+      <select id="specFilter"><option value="">All</option></select>
+      <label for="feesFilter">Max Fees:</label>
+      <input type="number" id="feesFilter" min="0" placeholder="INR" style="width:100px;">
+      <label for="sortBy">Sort by:</label>
+      <select id="sortBy">
+        <option value="cutoff">Cutoff</option>
+        <option value="fees">Fees</option>
+        <option value="name">Name</option>
+      </select>
+      <button id="clearFilters" type="button">Clear Filters</button>
+    </section>
+    <div id="resultsCount" role="status" aria-live="polite"></div>
+    <div class="cards-grid" id="cardsGrid" aria-live="polite" aria-relevant="additions"></div>
+    <div class="newsletter">
+      <div>
+        <b>Get Updates!</b> Sign up for email alerts when new colleges or cutoffs are added.
+      </div>
+      <form id="newsletterForm" style="display:flex;gap:1rem;">
+        <input type="email" id="newsletterEmail" placeholder="Your email" required>
+        <button type="submit" class="newsletter-btn">Subscribe</button>
+      </form>
+      <div id="newsletterMsg"></div>
+    </div>
+    <section class="faq-section">
+      <h3>Frequently Asked Questions</h3>
+      <div class="faq">
+        <div class="faq-question">What is CUET-PG?</div>
+        <div class="faq-answer">CUET-PG is the Common University Entrance Test for Postgraduate admissions in India.</div>
+      </div>
+      <div class="faq">
+        <div class="faq-question">How are cutoffs calculated?</div>
+        <div class="faq-answer">Cutoffs are based on previous years' data and may vary by college, course, and category.</div>
+      </div>
+      <div class="faq">
+        <div class="faq-question">How do I apply to colleges?</div>
+        <div class="faq-answer">Visit the official college website and follow their admission process after CUET-PG results.</div>
+      </div>
+      <div class="faq">
+        <div class="faq-question">Can I save or compare colleges?</div>
+        <div class="faq-answer">Yes! Use the "Shortlist" and "Compare" features on this site.</div>
+      </div>
+    </section>
+  </div>
+  <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+    <div class="modal-content">
+      <button id="closeModal" class="close-btn" aria-label="Close modal">&times;</button>
+      <div id="modalDetails"></div>
     </div>
   </div>
-
+  <div id="compareModal" role="dialog" aria-modal="true" aria-labelledby="compareModalTitle" tabindex="-1">
+    <div class="modal-content">
+      <button id="closeCompareModal" class="close-btn" aria-label="Close modal">&times;</button>
+      <div id="compareModalDetails"></div>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="container footer-container">
+      <div class="footer-section footer-about">
+        <h3>CUET College Finder</h3>
+        <p>Your go-to platform to find the best colleges based on your CUET-PG score. Powered by passion and data.</p>
+      </div>
+      <div class="footer-section footer-links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="#hero">Home</a></li>
+          <li><a href="#finderForm">Find Colleges</a></li>
+          <li><a href="#resultsCount">Results</a></li>
+          <li><a href="https://undraw.co/" target="_blank" rel="noopener noreferrer">Illustrations by unDraw</a></li>
+        </ul>
+      </div>
+      <div class="footer-section footer-contact">
+        <h4>Contact Us</h4>
+        <p>Email: <a href="mailto:support@cuetcollegefinder.com">support@cuetcollegefinder.com</a></p>
+        <p>Follow us on:</p>
+        <div class="social-icons">
+          <a href="https://twitter.com/" target="_blank" aria-label="Twitter" rel="noopener noreferrer">🐦</a>
+          <a href="https://facebook.com/" target="_blank" aria-label="Facebook" rel="noopener noreferrer">📘</a>
+          <a href="https://instagram.com/" target="_blank" aria-label="Instagram" rel="noopener noreferrer">📸</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 CUET College Finder. All rights reserved.</p>
+    </div>
+  </footer>
   <script>
-    const data = [
-      {
-    name: "University of Delhi (DU)",
-    course: "MA",
-    specialization: "Clinical, Counselling",
-    location: "Delhi, Delhi",
-    collegeType: "Central",
-    process: "CUET-PG",
-    cutoff: "240–250+",
-    eligibility: "Psychology background preferred/required",
-    accreditation: "NAAC A+, NIRF Top 20",
-    fees: "10,000–20,000",
-    scholarships: "Yes",
-    placements: "Yes",
-    mode: "Regular",
-    facilities: "Labs, Library, Hostel",
-    batchSize: "Large",
-    peerReviews: "4.5/5",
-    why: "Top-ranked, historic, excellent faculty and placements"
-  },
-  {
-    name: "Jawaharlal Nehru University (JNU)",
-    course: "MA",
-    specialization: "General",
-    location: "Delhi, Delhi",
-    collegeType: "Central",
-    process: "CUET-PG",
-    cutoff: "230–240+",
-    eligibility: "Any discipline (preferred Psychology)",
-    accreditation: "NAAC A++, NIRF Top 10",
-    fees: "12,000–15,000",
-    scholarships: "Yes",
-    placements: "Yes",
-    mode: "Regular",
-    facilities: "Library, Hostel",
-    batchSize: "Medium",
-    peerReviews: "4.6/5",
-    why: "Nationally prestigious, research-driven, top faculty"
-  },
-  {
-    name: "Banaras Hindu University (BHU)",
-    course: "MA/MSc",
-    specialization: "Both",
-    location: "Varanasi, UP",
-    collegeType: "Central",
-    process: "CUET-PG",
-    cutoff: "220–230+",
-    eligibility: "Psychology background required",
-    accreditation: "NAAC A, NIRF Top 20",
-    fees: "8,000–15,000",
-    scholarships: "Yes",
-    placements: "Yes",
-    mode: "Regular",
-    facilities: "Labs, Library, Hostel",
-    batchSize: "Large",
-    peerReviews: "4.4/5",
-    why: "Historic, high NIRF ranking, diverse programs"
-  },
-  {
-    name: "University of Hyderabad",
-    course: "MSc",
-    specialization: "General",
-    location: "Hyderabad, Telangana",
-    collegeType: "Central",
-    process: "CUET-PG",
-    cutoff: "210–220+",
-    eligibility: "Any discipline (preferred Psychology)",
-    accreditation: "NAAC A, NIRF Top 10",
-    fees: "10,000–15,000",
-    scholarships: "Yes",
-    placements: "Yes",
-    mode: "Regular",
-    facilities: "Labs, Library, Hostel",
-    batchSize: "Medium",
-    peerReviews: "4.5/5",
-    why: "Top-10 NIRF, research-intensive, strong faculty"
-  },
-  {
-    name: "Tata Institute of Social Sciences (TISS)",
-    course: "MA",
-    specialization: "Clinical, Counselling",
-    location: "Mumbai, Maharashtra",
-    collegeType: "Deemed",
-    process: "TISSNET",
-    cutoff: "",
-    eligibility: "Any discipline + SOP",
-    accreditation: "NAAC A+, NIRF Top 50",
-    fees: "60,000–100,000",
-    scholarships: "Yes",
-    placements: "Yes",
-    mode: "Regular",
-    facilities: "Labs, Library, Hostel",
-    batchSize: "Medium",
-    peerReviews: "4.7/5",
-    why: "Elite social sciences, best for fieldwork and placements"
-  },
-  {
-    name: "Jamia Millia Islamia (JMI)",
-    course: "MA",
-    specialization: "Clinical",
-    location: "Delhi, Delhi",
-    collegeType: "Central",
-    process: "Entrance Test (JMI)",
-    cutoff: "",
-    eligibility: "Psychology background required",
-    accreditation: "NAAC A",
-    fees: "25,000–30,000",
-    scholarships: "Yes",
-    placements: "Yes",
-    mode: "Regular",
-    facilities: "Labs, Library, Hostel",
-    batchSize: "Medium",
-    peerReviews: "4.3/5",
-    why: "Strong clinical focus, rigorous coursework, good placements"
-  },
-  {
-    name: "Pondicherry University",
-    course: "MSc",
-    specialization: "General",
-    location: "Puducherry, Puducherry",
-    collegeType: "Central",
-    process: "CUET-PG",
-    cutoff: "200–210+",
-    eligibility: "Bachelor's in Psychology preferred",
-    accreditation: "NAAC A",
-    fees: "12,000–15,000",
-    scholarships: "Yes",
-    placements: "Moderate",
-    mode: "Regular",
-    facilities: "Labs, Library, Hostel",
-    batchSize: "Medium",
-    peerReviews: "4.0/5",
-    why: "Central university, affordable, good research"
-  },
-  {
-    name: "University of Calcutta",
-    course: "MA/MSc",
-    specialization: "General",
-    location: "Kolkata, West Bengal",
-    collegeType: "State",
-    process: "Non-CUET",
-    cutoff: "",
-    eligibility: "Psychology background required",
-    accreditation: "NAAC A",
-    fees: "10,000–15,000",
-    scholarships: "Yes",
-    placements: "Moderate",
-    mode: "Regular",
-    facilities: "Labs, Library",
-    batchSize: "Large",
-    peerReviews: "4.1/5",
-    why: "Oldest Indian university, academic legacy, strong faculty"
-  },
-  {
-    name: "University of Madras",
-    course: "MA",
-    specialization: "Counselling/Clinical",
-    location: "Chennai, Tamil Nadu",
-    collegeType: "State",
-    process: "Non-CUET",
-    cutoff: "",
-    eligibility: "Psychology background required",
-    accreditation: "NAAC A",
-    fees: "8,000–12,000",
-    scholarships: "Yes",
-    placements: "Moderate",
-    mode: "Regular",
-    facilities: "Labs, Library, Hostel",
-    batchSize: "Medium",
-    peerReviews: "4.0/5",
-    why: "Historic, strong clinical/counselling programs"
-  },
-  {
-    name: "Savitribai Phule Pune University",
-    course: "MA",
-    specialization: "Counselling",
-    location: "Pune, Maharashtra",
-    collegeType: "State",
-    process: "Non-CUET",
-    cutoff: "",
-    eligibility: "Psychology background required",
-    accreditation: "NAAC A+",
-    fees: "10,000–15,000",
-    scholarships: "Yes",
-    placements: "Moderate",
-    mode: "Regular",
-    facilities: "Labs, Library",
-    batchSize: "Large",
-    peerReviews: "4.2/5",
-    why: "Prestigious state university, strong psychology department"
-  },
-  {
-    name: "Aligarh Muslim University (AMU)",
-    course: "MA",
-    specialization: "General",
-    location: "Aligarh, Uttar Pradesh",
-    collegeType: "Central",
-    process: "Non-CUET",
-    cutoff: "",
-    eligibility: "Psychology background required",
-    accreditation: "NAAC A",
-    fees: "10,000–12,000",
-    scholarships: "Yes",
-    placements: "Moderate",
-    mode: "Regular",
-    facilities: "Labs, Library, Hostel",
-    batchSize: "Medium",
-    peerReviews: "4.0/5",
-    why: "Nationally reputed, diverse student body, good faculty"
-  },
-  {
-    name: "Osmania University",
-    course: "MA",
-    specialization: "General",
-    location: "Hyderabad, Telangana",
-    collegeType: "State",
-    process: "Non-CUET",
-    cutoff: "",
-    eligibility: "Psychology background required",
-    accreditation: "NAAC A",
-    fees: "8,000–12,000",
-    scholarships: "Yes",
-    placements: "Moderate",
-    mode: "Regular",
-    facilities: "Labs, Library",
-    batchSize: "Large",
-    peerReviews: "4.0/5",
-    why: "Top Telangana university, strong research, affordable"
-  },
-  {
-    name: "Dr. B.R. Ambedkar University Delhi (AUD)",
-    course: "MA",
-    specialization: "Psychosocial Clinical Studies",
-    location: "Delhi, Delhi",
-    collegeType: "Central",
-    process: "Own Entrance",
-    cutoff: "",
-    eligibility: "Open to all disciplines",
-    accreditation: "NAAC A",
-    fees: "15,000–20,000",
-    scholarships: "Yes",
-    placements: "Moderate",
-    mode: "Regular",
-    facilities: "Labs, Library",
-    batchSize: "Small",
-    peerReviews: "4.1/5",
-    why: "Unique psychosocial focus, flexible eligibility, good placements"
-  }
-    ];
-
-    function renderTable(filteredData) {
-      const tableBody = document.getElementById("tableBody");
-      tableBody.innerHTML = "";
-      filteredData.forEach(college => {
-        const row = `<tr>
-            <td>${college.name}</td>
-            <td>${college.course}</td>
-            <td>${college.specialization}</td>
-            <td>${college.location}</td>
-            <td>${college.collegeType}</td>
-            <td>${college.process}</td>
-            <td>${college.cutoff || ""}</td>
-            <td>${college.eligibility}</td>
-            <td>${college.accreditation}</td>
-            <td>${college.fees}</td>
-            <td>${college.scholarships}</td>
-            <td>${college.placements}</td>
-            <td>${college.mode}</td>
-            <td>${college.facilities}</td>
-            <td>${college.batchSize}</td>
-            <td>${college.peerReviews}</td>
-            <td>${college.why}</td>
-        </tr>`;
-        tableBody.innerHTML += row;
-      });
+    // --- Utility Functions ---
+    function parseCutoff(cutoffStr) {
+      if (!cutoffStr) return null;
+      const match = cutoffStr.match(/\d+/);
+      return match ? parseInt(match[0], 10) : null;
     }
-
-   function filterTable() {
-      const query = document.getElementById("searchInput").value.toLowerCase();
-      const process = document.getElementById("processFilter").value;
-      const courseType = document.getElementById("courseTypeFilter").value;
-      const specialization = document.getElementById("specializationFilter").value;
-      const location = document.getElementById("locationFilter").value;
-      const collegeType = document.getElementById("collegeTypeFilter").value;
-      const mode = document.getElementById("modeFilter").value;
-      const fees = document.getElementById("feesFilter").value;
-    
-      const filtered = data.filter(college => {
-        // Search
-        const matchesSearch = Object.values(college).some(val =>
-          String(val).toLowerCase().includes(query)
-        );
-    
-        // Admission Process
-        const matchesProcess = (process === "All") || (college.process === process);
-    
-        // Course Type
-        const matchesCourseType = (courseType === "All") || (college.course === courseType);
-    
-        // Specialization
-        const matchesSpecialization = (specialization === "All") ||
-          (college.specialization && college.specialization.toLowerCase().includes(specialization.toLowerCase()));
-    
-        // Location (checks if city or state matches)
-        const matchesLocation = (location === "All") ||
-          (college.location && college.location.toLowerCase().includes(location.toLowerCase()));
-    
-        // College Type
-        const matchesCollegeType = (collegeType === "All") ||
-          (college.collegeType && college.collegeType.toLowerCase().includes(collegeType.toLowerCase()));
-    
-        // Mode of Study
-        const matchesMode = (mode === "All") ||
-          (college.mode && college.mode.toLowerCase().includes(mode.toLowerCase()));
-    
-        // Fees
-        let matchesFees = true;
-        if (fees !== "All" && college.fees) {
-          // Extract the lower and upper fee values (remove commas, handle ranges)
-          let feeStr = college.fees.replace(/,/g, '').replace(/[^\d–-]/g, '');
-          let [minFee, maxFee] = feeStr.split(/–|-/).map(Number);
-          if (!maxFee) maxFee = minFee;
-          if (fees === "under20k") matchesFees = minFee <= 20000;
-          if (fees === "20kto50k") matchesFees = minFee >= 20000 && maxFee <= 50000;
-          if (fees === "50kto1L") matchesFees = minFee >= 50000 && maxFee <= 100000;
-          if (fees === "above1L") matchesFees = minFee >= 100000;
+    function parseFees(feesStr) {
+      if (!feesStr) return null;
+      const match = feesStr.replace(/,/g, '').match(/\d+/g);
+      return match ? Math.min(...match.map(Number)) : null;
+    }
+    function getStates(colleges) {
+      const set = new Set();
+      colleges.forEach(c => {
+        if (c['Location (City, State)']) {
+          let state = c['Location (City, State)'].split(',').pop().trim();
+          if (state) set.add(state);
         }
-    
-        return (
-          matchesSearch &&
-          matchesProcess &&
-          matchesCourseType &&
-          matchesSpecialization &&
-          matchesLocation &&
-          matchesCollegeType &&
-          matchesMode &&
-          matchesFees
-        );
       });
-    
-      renderTable(filtered);
+      return Array.from(set).sort();
     }
-
-    // Initial render
+    function getSpecs(colleges) {
+      const set = new Set();
+      colleges.forEach(c => {
+        if (c['Specialization']) set.add(c['Specialization']);
+      });
+      return Array.from(set).sort();
+    }
+    // --- Data and State ---
+    let colleges = [];
+    let filteredColleges = [];
+    let lastScore = null;
+    let favorites = JSON.parse(localStorage.getItem('cuet_favs') || '[]');
+    let compareList = [];
+    let reviews = JSON.parse(localStorage.getItem('cuet_reviews') || '{}');
+    // --- Fetch Data ---
+    function showSpinner() {
+      document.getElementById('cardsGrid').innerHTML = `<div class="spinner"><div></div><div></div><div></div></div>`;
+    }
+    showSpinner();
+    fetch('PG-Colleges.json')
+      .then(response => response.json())
+      .then(data => {
+        colleges = data;
+        populateFilters();
+        renderCards([]);
+      })
+      .catch(err => {
+        document.getElementById('cardsGrid').innerHTML = `<div style="color:#d84315; font-weight:700; text-align:center;">Failed to load college data. Please check PG-Colleges.json.</div>`;
+        console.error(err);
+      });
+    // --- Filters ---
+    function populateFilters() {
+      const stateSel = document.getElementById('stateFilter');
+      getStates(colleges).forEach(state => {
+        const opt = document.createElement('option');
+        opt.value = state;
+        opt.textContent = state;
+        stateSel.appendChild(opt);
+      });
+      const specSel = document.getElementById('specFilter');
+      getSpecs(colleges).forEach(spec => {
+        const opt = document.createElement('option');
+        opt.value = spec;
+        opt.textContent = spec;
+        specSel.appendChild(opt);
+      });
+    }
+    function applyFilters() {
+      let arr = colleges.slice();
+      if (lastScore !== null) {
+        arr = arr.filter(college =>
+          college['Admission Process'] === "CUET-PG" &&
+          parseCutoff(college['2024 CUET-PG Cutoff (Gen)']) !== null &&
+          lastScore >= parseCutoff(college['2024 CUET-PG Cutoff (Gen)'])
+        );
+      }
+      const state = document.getElementById('stateFilter').value;
+      if (state) arr = arr.filter(c => c['Location (City, State)'] && c['Location (City, State)'].includes(state));
+      const spec = document.getElementById('specFilter').value;
+      if (spec) arr = arr.filter(c => c['Specialization'] === spec);
+      const maxFees = parseInt(document.getElementById('feesFilter').value, 10);
+      if (!isNaN(maxFees)) arr = arr.filter(c => parseFees(c['Fees (Annual INR)']) !== null && parseFees(c['Fees (Annual INR)']) <= maxFees);
+      const sortBy = document.getElementById('sortBy').value;
+      if (sortBy === 'cutoff') arr.sort((a, b) => parseCutoff(b['2024 CUET-PG Cutoff (Gen)']) - parseCutoff(a['2024 CUET-PG Cutoff (Gen)']));
+      if (sortBy === 'fees') arr.sort((a, b) => parseFees(a['Fees (Annual INR)']) - parseFees(b['Fees (Annual INR)']));
+      if (sortBy === 'name') arr.sort((a, b) => (a['College Name']||'').localeCompare(b['College Name']||''));
+      filteredColleges = arr;
+      renderCards(arr);
+    }
+    document.getElementById('stateFilter').onchange = applyFilters;
+    document.getElementById('specFilter').onchange = applyFilters;
+    document.getElementById('feesFilter').oninput = applyFilters;
+    document.getElementById('sortBy').onchange = applyFilters;
+    document.getElementById('clearFilters').onclick = function() {
+      document.getElementById('stateFilter').value = '';
+      document.getElementById('specFilter').value = '';
+      document.getElementById('feesFilter').value = '';
+      document.getElementById('sortBy').value = 'cutoff';
+      applyFilters();
+    };
+    // --- Main Search ---
+    document.getElementById('finderForm').onsubmit = function (e) {
+      e.preventDefault();
+      lastScore = parseInt(document.getElementById('scoreInput').value, 10);
+      if (isNaN(lastScore)) {
+        document.getElementById('resultsCount').textContent = '';
+        renderCards([]);
+        return;
+      }
+      applyFilters();
+      document.getElementById('resultsCount').textContent = `Showing ${filteredColleges.length} colleges for CUET-PG score ${lastScore}`;
+    };
+    // --- Render Cards ---
+    function renderCards(collegesList) {
+      const grid = document.getElementById('cardsGrid');
+      grid.innerHTML = '';
+      if (collegesList.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center text-gray-400 text-lg">No colleges found for this score and filters.</div>`;
+        return;
+      }
+      collegesList.forEach((college, idx) => {
+        const isFav = favorites.includes(college['College Name']);
+        const isCompare = compareList.includes(college['College Name']);
+        const card = document.createElement('article');
+        card.className = 'college-card';
+        card.setAttribute('tabindex', '0');
+        card.innerHTML = `
+          <h3>${college['College Name']}</h3>
+          <div class="college-meta" aria-label="College information">
+            <span title="Course Type">${college['Course Type']}</span>
+            <span title="Specialization">${college['Specialization']}</span>
+            <span title="Location">${college['Location (City, State)']}</span>
+          </div>
+          <div>
+            <span class="cutoff" title="General Category Cutoff">Cutoff: ${college['2024 CUET-PG Cutoff (Gen)'] || 'N/A'}</span>
+          </div>
+          <button class="details-btn" data-idx="${idx}" aria-label="View details of ${college['College Name']}">Details</button>
+          <button class="fav-btn${isFav ? ' favorited' : ''}" data-idx="${idx}" aria-label="Shortlist this college">${isFav ? '★ Shortlisted' : '☆ Shortlist'}</button>
+          <button class="compare-btn${isCompare ? ' selected' : ''}" data-idx="${idx}" aria-label="Add to compare">${isCompare ? '✓ Compare' : '⇄ Compare'}</button>
+        `;
+        grid.appendChild(card);
+      });
+      // Attach events
+      document.querySelectorAll('.details-btn').forEach(btn => {
+        btn.onclick = function () { showDetails(parseInt(this.getAttribute('data-idx'))); };
+      });
+      document.querySelectorAll('.fav-btn').forEach(btn => {
+        btn.onclick = function () {
+          const idx = parseInt(this.getAttribute('data-idx'));
+          const cname = filteredColleges[idx]['College Name'];
+          if (favorites.includes(cname)) {
+            favorites = favorites.filter(f => f !== cname);
+          } else {
+            favorites.push(cname);
+          }
+          localStorage.setItem('cuet_favs', JSON.stringify(favorites));
+          renderCards(filteredColleges);
+        };
+      });
+      document.querySelectorAll('.compare-btn').forEach(btn => {
+        btn.onclick = function () {
+          const idx = parseInt(this.getAttribute('data-idx'));
+          const cname = filteredColleges[idx]['College Name'];
+          if (compareList.includes(cname)) {
+            compareList = compareList.filter(f => f !== cname);
+          } else {
+            if (compareList.length >= 3) {
+              alert('You can compare up to 3 colleges at a time.');
+              return;
+            }
+            compareList.push(cname);
+          }
+          renderCards(filteredColleges);
+          if (compareList.length >= 2) showCompareModal();
+        };
+      });
+    }
+    // --- Details Modal ---
+    function showDetails(idx) {
+      const college = filteredColleges[idx];
+      if (!college) return;
+      let html = `<h2 id="modalTitle">${college['College Name']}</h2><ul>`;
+      for (const key in college) {
+        html += `<li><strong>${key}:</strong> ${college[key]}</li>`;
+      }
+      html += `</ul>`;
+      // Trend Chart
+      html += `<div class="trend-chart-container"><canvas id="trendChart" width="400" height="140"></canvas></div>`;
+      // Share button
+      html += `<button class="share-btn" onclick="navigator.clipboard.writeText(window.location.href + '?score=${lastScore}&college=${encodeURIComponent(college['College Name'])});alert('Link copied!');">Share Result</button>`;
+      // Reviews
+      html += `<div class="review-section">
+        <h4>Reviews</h4>
+        <ul class="review-list" id="reviewList"></ul>
+        <form class="review-form" id="reviewForm">
+          <input type="text" id="reviewerName" placeholder="Your name" required>
+          <textarea id="reviewText" placeholder="Your review" rows="2" required></textarea>
+          <button type="submit">Add Review</button>
+        </form>
+      </div>`;
+      const modal = document.getElementById('modal');
+      document.getElementById('modalDetails').innerHTML = html;
+      modal.classList.add('active');
+      modal.focus();
+      // Trend chart
+      setTimeout(() => renderTrendChart(college), 200);
+      // Reviews
+      renderReviews(college['College Name']);
+      document.getElementById('reviewForm').onsubmit = function(e) {
+        e.preventDefault();
+        const name = document.getElementById('reviewerName').value.trim();
+        const text = document.getElementById('reviewText').value.trim();
+        if (!name || !text) return;
+        if (!reviews[college['College Name']]) reviews[college['College Name']] = [];
+        reviews[college['College Name']].push({ name, text, date: new Date().toLocaleDateString() });
+        localStorage.setItem('cuet_reviews', JSON.stringify(reviews));
+        renderReviews(college['College Name']);
+        this.reset();
+      };
+    }
+    document.getElementById('closeModal').onclick = function () {
+      document.getElementById('modal').classList.remove('active');
+    };
+    // --- Reviews ---
+    function renderReviews(collegeName) {
+      const list = document.getElementById('reviewList');
+      if (!reviews[collegeName] || reviews[collegeName].length === 0) {
+        list.innerHTML = `<li>No reviews yet. Be the first!</li>`;
+        return;
+      }
+      list.innerHTML = reviews[collegeName].map(r =>
+        `<li><b>${r.name}</b> (${r.date}): ${r.text}</li>`
+      ).join('');
+    }
+    // --- Trend Chart ---
+    function renderTrendChart(college) {
+      const ctx = document.getElementById('trendChart').getContext('2d');
+      // Dummy trend data: show current cutoff and 3 previous years with random variation
+      const base = parseCutoff(college['2024 CUET-PG Cutoff (Gen)']) || 200;
+      const data = [base + 10, base + 5, base, base - 5];
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['2021', '2022', '2023', '2024'],
+          datasets: [{
+            label: 'Gen Cutoff',
+            data: data,
+            borderColor: '#0055d3',
+            backgroundColor: 'rgba(0,85,211,0.09)',
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: '#0055d3'
+          }]
+        },
+        options: {
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: false } }
+        }
+      });
+    }
+    // --- Compare Modal ---
+    function showCompareModal() {
+      const modal = document.getElementById('compareModal');
+      let html = `<h2 id="compareModalTitle">Compare Colleges</h2>`;
+      const selected = colleges.filter(c => compareList.includes(c['College Name']));
+      if (selected.length < 2) {
+        html += `<div>Please select at least 2 colleges to compare.</div>`;
+      } else {
+        html += `<table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <th style="text-align:left;padding:6px;">Field</th>
+            ${selected.map(c => `<th style="text-align:left;padding:6px;">${c['College Name']}</th>`).join('')}
+          </tr>
+          ${['Course Type','Specialization','Location (City, State)','2024 CUET-PG Cutoff (Gen)','Fees (Annual INR)','Scholarships','Placement Support'].map(field =>
+            `<tr>
+              <td style="padding:6px;"><b>${field}</b></td>
+              ${selected.map(c => `<td style="padding:6px;">${c[field]||'-'}</td>`).join('')}
+            </tr>`
+          ).join('')}
+        </table>`;
+      }
+      html += `<button class="compare-btn" onclick="compareList=[];document.getElementById('compareModal').classList.remove('active');applyFilters();">Clear Comparison</button>`;
+      document.getElementById('compareModalDetails').innerHTML = html;
+      modal.classList.add('active');
+      modal.focus();
+    }
+    document.getElementById('closeCompareModal').onclick = function () {
+      document.getElementById('compareModal').classList.remove('active');
+    };
+    // --- Shortlist/Favorites Page ---
+    // (You can add a section to view all favorites if you want)
+    // --- Newsletter (dummy) ---
+    document.getElementById('newsletterForm').onsubmit = function(e) {
+      e.preventDefault();
+      const email = document.getElementById('newsletterEmail').value.trim();
+      if (!email) return;
+      document.getElementById('newsletterMsg').textContent = "Thank you for subscribing!";
+      this.reset();
+    };
+    // --- FAQ toggle ---
+    document.querySelectorAll('.faq-question').forEach(q => {
+      q.onclick = function() {
+        this.parentNode.classList.toggle('open');
+      }
+    });
+    // --- Dark Mode ---
+    document.querySelector('.dark-toggle').onclick = function() {
+      document.body.classList.toggle('dark');
+    };
+    // --- Back to Top ---
+    const backBtn = document.querySelector('.back-to-top');
+    window.onscroll = function() {
+      if (window.scrollY > 300) backBtn.classList.add('visible');
+      else backBtn.classList.remove('visible');
+    };
+    backBtn.onclick = function() {
+      window.scrollTo({top:0,behavior:'smooth'});
+    };
+    // --- Shareable Results (parse URL params) ---
     window.onload = function() {
-      renderTable(data);
-        document.getElementById("searchInput").addEventListener("input", filterTable);
-        document.getElementById("processFilter").addEventListener("change", filterTable);
-        document.getElementById("courseTypeFilter").addEventListener("change", filterTable);
-        document.getElementById("specializationFilter").addEventListener("change", filterTable);
-        document.getElementById("locationFilter").addEventListener("change", filterTable);
-        document.getElementById("collegeTypeFilter").addEventListener("change", filterTable);
-        document.getElementById("modeFilter").addEventListener("change", filterTable);
-        document.getElementById("feesFilter").addEventListener("change", filterTable);
-    }
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('score')) {
+        document.getElementById('scoreInput').value = params.get('score');
+        document.getElementById('finderForm').dispatchEvent(new Event('submit'));
+      }
+    };
   </script>
 </body>
 </html>
